@@ -1,1 +1,83 @@
+name: Deploy static site
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # REQUIRED for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: nerdtees-store-site
+  CF_DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_ID }}
+  SITE_URL: ${{ vars.SITE_URL }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set cache-control values
+        run: |
+          echo "public,max-age=3600" > .cache_default
+          echo "public,max-age=604800,immutable" > .cache_assets
+          echo "public,max-age=60" > .cache_data
+
+      - name: Sync root and pages (default 1h)
+        run: |
+          aws s3 sync . s3://$S3_BUCKET \
+            --delete \
+            --exclude ".git/*" --exclude ".github/*" --exclude "assets/*" --exclude "data/index.json" \
+            --exclude "cloudfront-functions/*" \
+            --metadata-directive REPLACE \
+            --cache-control "$(cat .cache_default)" \
+            --acl private
+
+      - name: Sync assets (7d immutable)
+        run: |
+          # CSS
+          aws s3 sync assets s3://$S3_BUCKET/assets \
+            --delete \
+            --exclude "*" --include "*.css" \
+            --metadata-directive REPLACE \
+            --cache-control "$(cat .cache_assets)" \
+            --content-type "text/css; charset=utf-8" || true
+          # JS
+          aws s3 sync assets s3://$S3_BUCKET/assets \
+            --exclude "*" --include "*.js" \
+            --metadata-directive REPLACE \
+            --cache-control "$(cat .cache_assets)" \
+            --content-type "application/javascript; charset=utf-8" || true
+          # Everything else in assets (optional, add includes as needed)
+
+      - name: Upload data/index.json (60s)
+        if: always()
+        run: |
+          aws s3 cp data/index.json s3://$S3_BUCKET/data/index.json \
+            --metadata-directive REPLACE \
+            --cache-control "$(cat .cache_data)" \
+            --content-type "application/json"
+
+      - name: Ensure xml/robots content types
+        run: |
+          [ -f feed.xml ] && aws s3 cp feed.xml s3://$S3_BUCKET/feed.xml --metadata-directive REPLACE --cache-control "public,max-age=3600" --content-type "application/atom+xml; charset=utf-8" || true
+          [ -f sitemap.xml ] && aws s3 cp sitemap.xml s3://$S3_BUCKET/sitemap.xml --metadata-directive REPLACE --cache-control "public,max-age=3600" --content-type "application/xml; charset=utf-8" || true
+          [ -f robots.txt ] && aws s3 cp robots.txt s3://$S3_BUCKET/robots.txt --metadata-directive REPLACE --cache-control "public,max-age=3600" --content-type "text/plain; charset=utf-8" || true
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CF_DISTRIBUTION_ID" \
+            --paths "/*"
 
