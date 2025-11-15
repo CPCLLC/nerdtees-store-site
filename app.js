@@ -1,9 +1,31 @@
 async function loadTees() {
   const container = document.getElementById('teesGrid');
+  console.log('teesGrid container:', container);
+
+  if (!container) {
+    console.error('No element with id "teesGrid" found in the DOM.');
+    return;
+  }
 
   try {
     const res = await fetch('/data/tees.js');
+    console.log('Fetch response status:', res.status, res.statusText);
+
+    if (!res.ok) {
+      console.error('Failed to fetch tees.js');
+      container.innerHTML = `<p class="text-red-600">Failed to load tees (HTTP ${res.status}).</p>`;
+      return;
+    }
+
     const tees = await res.json();
+    console.log('Loaded tees:', tees);
+    console.log('First tee:', tees[0]);
+    console.log('Total tees:', Array.isArray(tees) ? tees.length : 'not an array');
+
+    if (!Array.isArray(tees) || tees.length === 0) {
+      container.innerHTML = `<p class="text-gray-600">No tees found.</p>`;
+      return;
+    }
 
     container.innerHTML = tees.map(tee => {
       return `
@@ -13,16 +35,17 @@ async function loadTees() {
           </a>
           <h2 class="mt-2 font-semibold text-sm">${tee.title}</h2>
           <p class="text-gray-600 text-xs">${tee.brand || ''}</p>
-          <p class="font-bold mt-1">${tee.price.display || ""}</p>
+          <p class="font-bold mt-1">${tee.price?.display || ""}</p>
         </div>
       `;
     }).join('');
 
   } catch (err) {
-    console.error('Error loading tees:', err);
-    container.innerHTML = `<p class="text-red-600">Failed to load tees.</p>`;
+    console.error('Error loading tees.js:', err);
+    container.innerHTML = `<p class="text-red-600">Error loading tees.</p>`;
   }
 }
 
 loadTees();
+
 
