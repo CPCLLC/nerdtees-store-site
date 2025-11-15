@@ -34,15 +34,18 @@ jobs:
           echo "public,max-age=604800,immutable" > .cache_assets
           echo "public,max-age=60" > .cache_data
 
-      - name: Sync root and pages (default 1h)
+            - name: Sync root and pages (default 1h)
         run: |
           aws s3 sync . s3://$S3_BUCKET \
             --delete \
-            --exclude ".git/*" --exclude ".github/*" --exclude "assets/*" --exclude "data/index.json" \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "assets/*" \
+            --exclude "data/index.json" \
             --exclude "cloudfront-functions/*" \
+            --exclude ".cache_*" \
             --metadata-directive REPLACE \
-            --cache-control "$(cat .cache_default)" \
-            --acl public-read     # changed from private to public-read
+            --cache-control "$(cat .cache_default)"
 
       - name: Configure static website hosting
         run: |
