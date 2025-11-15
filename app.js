@@ -27,11 +27,19 @@ async function loadTees() {
       return;
     }
 
+        const placeholder =
+      'https://via.placeholder.com/400x400?text=NerdTees';
+
     container.innerHTML = tees.map(tee => {
       return `
         <div class="bg-white rounded shadow overflow-hidden hover:shadow-lg transition p-3">
           <a href="${tee.detail_url}" target="_blank" rel="noopener">
-            <img src="${tee.image_url}" alt="${tee.title}" class="w-full h-64 object-cover rounded">
+            <img
+              src="${tee.image_url || placeholder}"
+              alt="${tee.title}"
+              class="w-full h-64 object-cover rounded"
+              onerror="this.onerror=null;this.src='${placeholder}';"
+            >
           </a>
           <h2 class="mt-2 font-semibold text-sm">${tee.title}</h2>
           <p class="text-gray-600 text-xs">${tee.brand || ''}</p>
@@ -39,6 +47,8 @@ async function loadTees() {
         </div>
       `;
     }).join('');
+
+
 
   } catch (err) {
     console.error('Error loading tees.js:', err);
