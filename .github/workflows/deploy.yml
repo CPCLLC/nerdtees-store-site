@@ -47,11 +47,11 @@ jobs:
             --metadata-directive REPLACE \
             --cache-control "$(cat .cache_default)"
 
-      - name: Configure static website hosting
-        run: |
-          aws s3 website s3://$S3_BUCKET \
-            --index-document index.html \
-            --error-document index.html
+      #      - name: Configure static website hosting
+      #      run: |
+      #      aws s3 website s3://$S3_BUCKET \
+      #      --index-document index.html \
+      #      --error-document index.html
 
       - name: Sync assets (7d immutable)
         run: |
