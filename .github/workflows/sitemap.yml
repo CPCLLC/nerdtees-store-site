@@ -1,8 +1,5 @@
 name: Update Sitemap
 
-o# File: .github/workflows/sitemap.yml
-name: Update Sitemap
-
 on:
   push:
     branches:
@@ -13,7 +10,7 @@ on:
       - "*.html"
       - "*.md"
   schedule:
-    - cron: '0 0 * * *'   # daily at midnight UTC
+    - cron: '0 0 * * *'
 
 jobs:
   sitemap:
@@ -22,15 +19,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0         # required for correct <lastmod> tags :contentReference[oaicite:0]{index=0}
+          fetch-depth: 0
 
       - name: Generate sitemap
         uses: cicirello/generate-sitemap@v1
         with:
           base-url-path: https://nerdtees.store/
-          # since you don’t have a separate site folder, use default path-to-root "."
           path-to-root: .
-      
+
       - name: Commit and push sitemap if changed
         run: |
           git config --global user.name 'github-actions[bot]'
