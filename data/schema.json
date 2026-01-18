@@ -1,0 +1,51 @@
+﻿{
+  "schema_version": "1.0.0",
+  "generated_at": null,
+  "source": {
+    "name": "amazon-paapi",
+    "region": null
+  },
+  "item_contract": {
+    "required": [
+      "asin",
+      "title",
+      "detail_url",
+      "image_url",
+      "last_seen"
+    ],
+    "recommended": [
+      "brand",
+      "price",
+      "category",
+      "tags",
+      "score",
+      "nsfw",
+      "availability",
+      "created_at"
+    ],
+    "notes": "Fields not listed are allowed. Consumers must ignore unknown fields."
+  },
+  "item_example": {
+    "asin": "B0XXXXXXX",
+    "title": "Funny Nerd Shirt: Quantum Cats",
+    "brand": "SomeBrand",
+    "detail_url": "https://www.amazon.com/dp/B0XXXXXXX?tag=YOURTAG-20",
+    "image_url": "https://m.media-amazon.com/images/I/....jpg",
+    "price": {
+      "display": "$19.99",
+      "amount": 19.99,
+      "currency": "USD"
+    },
+    "category": "T-Shirts",
+    "tags": ["quantum", "cats", "physics"],
+    "score": 0.73,
+    "nsfw": false,
+    "availability": "Unknown",
+    "created_at": "2026-01-18T00:00:00Z",
+    "last_seen": "2026-01-18T00:00:00Z",
+    "raw": {
+      "source_item_id": "optional",
+      "notes": "Place any provider-specific extras here to avoid breaking changes."
+    }
+  }
+}
