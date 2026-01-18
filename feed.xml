@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>NerdTees</title>
-  <id>https://nerdtees.store/</id>
-  <link href="https://nerdtees.store/feed.xml" rel="self"/>
-  <updated>2025-01-01T00:00:00Z</updated>
-  <!-- entries go here -->
-</feed>
